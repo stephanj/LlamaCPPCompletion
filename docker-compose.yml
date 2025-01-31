@@ -1,0 +1,24 @@
+version: '3.8'
+
+services:
+  llama-server:
+    image: ghcr.io/ggerganov/llama.cpp:server
+    platform: linux/arm64  # Specify platform for ARM systems
+    ports:
+      - "8012:8012"
+    volumes:
+      - ./models:/models
+#      -model /models/qwen2.5-coder-1.5b-q8_0.gguf
+#      -model /models/deepseek-coder-1.3b-instruct.Q8_0.gguf
+    command: >
+      --model /models/qwen2.5-coder-1.5b-q8_0.gguf 
+      --port 8012 
+      --host 0.0.0.0
+      -ngl 99 
+      -fa 
+      -ub 1024 
+      -b 1024 
+      -dt 0.1 
+      --ctx-size 0 
+      --cache-reuse 256 
+      -v

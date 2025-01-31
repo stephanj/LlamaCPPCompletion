@@ -1,0 +1,80 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<idea-plugin>
+    <id>com.devoxx.llamacpp</id>
+    <name>LlamaCPP Completions</name>
+    <vendor email="info@devoxx.com"
+            url="https://devoxx.com">Stephan Janssen</vendor>
+    <description><![CDATA[
+        Local LLM-assisted text completion using llama.cpp for IntelliJ-based IDEs.
+        Features:
+        <ul>
+            <li>Auto-suggest on input</li>
+            <li>Accept suggestions with customizable shortcuts</li>
+            <li>Context-aware completions</li>
+            <li>Configurable completion behavior</li>
+            <li>Performance monitoring</li>
+            <li>Supports any GGUF model</li>
+        </ul>
+    ]]></description>
+
+    <depends>com.intellij.modules.platform</depends>
+
+    <extensions defaultExtensionNs="com.intellij">
+        <applicationService serviceImplementation="com.devoxx.llamacpp.settings.LlamaSettings"/>
+        <applicationConfigurable
+                instance="com.devoxx.llamacpp.settings.LlamaSettingsConfigurable"
+                id="com.devoxx.llamacpp.settings.LlamaSettingsConfigurable"
+                displayName="Llama Completions"/>
+        <statusBarWidgetFactory
+                implementation="com.devoxx.llamacpp.ui.LlamaStatusBarFactory"
+                id="org.devoxx.llamacpp.ui.statusBar"
+                order="first"/>
+        <completion.contributor
+                language="any"
+                order="first"
+                implementationClass="com.devoxx.llamacpp.completion.LlamaCompletionContributor"/>
+        <toolWindow id="LlamaCPP Completions"
+                    anchor="right"
+                    factoryClass="com.devoxx.llamacpp.ui.LlamaToolWindowFactory"
+                    icon="/icons/pluginIcon.svg"/>
+
+        <applicationService serviceImplementation="com.devoxx.llamacpp.core.LlamaCore"/>
+    </extensions>
+
+    <actions>
+        <action id="Llama.TriggerCompletion"
+                class="com.devoxx.llamacpp.actions.TriggerCompletionAction"
+                text="Trigger Llama Completion"
+                description="Manually trigger Llama completion">
+            <keyboard-shortcut keymap="$default" first-keystroke="ctrl L"/>
+        </action>
+        <action id="Llama.AcceptFirstLine"
+                class="com.devoxx.llamacpp.actions.AcceptFirstLineAction"
+                text="Accept First Line"
+                description="Accept first line of completion">
+            <keyboard-shortcut keymap="$default" first-keystroke="shift TAB"/>
+        </action>
+        <action id="Llama.AcceptFirstWord"
+                class="com.devoxx.llamacpp.actions.AcceptFirstWordAction"
+                text="Accept First Word"
+                description="Accept the first word of the current Llama completion">
+            <keyboard-shortcut keymap="$default" first-keystroke="alt W"/>
+            <add-to-group group-id="EditorPopupMenu" anchor="last"/>
+        </action>
+        <group id="Llama.ToolbarActions" text="Llama Completions" popup="true">
+            <add-to-group group-id="ToolbarRunGroup" anchor="last"/>
+            <action id="Llama.ToolbarTrigger"
+                    class="com.devoxx.llamacpp.actions.TriggerCompletionAction"
+                    text="Trigger Llama Completion"
+                    description="Manually trigger Llama completion"
+                    icon="/icons/pluginIcon.svg">
+                <keyboard-shortcut keymap="$default" first-keystroke="ctrl L"/>
+            </action>
+        </group>
+    </actions>
+
+    <applicationListeners>
+        <listener class="com.devoxx.llamacpp.listeners.LlamaFileEditorListener"
+                  topic="com.intellij.openapi.fileEditor.FileEditorManagerListener"/>
+    </applicationListeners>
+</idea-plugin>
