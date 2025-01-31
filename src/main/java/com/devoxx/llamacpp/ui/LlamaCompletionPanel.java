@@ -3,7 +3,6 @@ package com.devoxx.llamacpp.ui;
 import com.devoxx.llamacpp.core.CompletionListener;
 import com.devoxx.llamacpp.core.LlamaResponse;
 import com.intellij.openapi.project.Project;
-import com.intellij.ui.components.JBList;
 import com.intellij.ui.components.JBScrollPane;
 import com.intellij.util.ui.JBUI;
 import com.devoxx.llamacpp.core.LlamaCore;
@@ -17,40 +16,35 @@ import org.jetbrains.annotations.NotNull;
 
 import javax.swing.*;
 import java.awt.*;
-import java.awt.event.MouseAdapter;
-import java.awt.event.MouseEvent;
 
 public class LlamaCompletionPanel extends JPanel {
-    private final JBList<CompletionItem> completionList;
-    private final DefaultListModel<CompletionItem> listModel;
     private final Project project;
     private final LlamaCore llamaCore;
     private final LlamaSettings settings;
     private final JCheckBox enabledCheckbox;
+    private final JPanel outputPanel;
 
     public LlamaCompletionPanel(Project project) {
         this.project = project;
         this.llamaCore = ApplicationManager.getApplication().getService(LlamaCore.class);
         this.settings = LlamaSettings.getInstance();
 
-        listModel = new DefaultListModel<>();
-        completionList = new JBList<>(listModel);
+        outputPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
 
         // Register as completion listener
         llamaCore.addCompletionListener(new CompletionListener() {
             @Override
             public void onNewCompletion(LlamaResponse response) {
                 SwingUtilities.invokeLater(() -> {
-                    listModel.clear();
+                    clearOutputPanel();
                     if (response != null && response.content() != null) {
                         String[] lines = response.content().split("\n");
                         for (String line : lines) {
                             if (!line.trim().isEmpty()) {
-                                listModel.addElement(new CompletionItem(line, response.timings()));
+                                CompletionItem completionItem = new CompletionItem(line, response.timings());
+                                insertCompletion(completionItem);
+                                outputPanel.add(new JLabel(completionItem.toString()));
                             }
-                        }
-                        if (!listModel.isEmpty()) {
-                            completionList.setSelectedIndex(0);
                         }
                     }
                 });
@@ -66,30 +60,15 @@ public class LlamaCompletionPanel extends JPanel {
 
         // Add enable/disable checkbox
         enabledCheckbox = new JCheckBox("Enable Completion", settings.isEnabled());
-        enabledCheckbox.addActionListener(e -> {
-            settings.setEnabled(enabledCheckbox.isSelected());
-        });
+        enabledCheckbox.addActionListener(e -> settings.setEnabled(enabledCheckbox.isSelected()));
         controlsPanel.add(enabledCheckbox, BorderLayout.NORTH);
 
-        // Setup cell renderer
-        completionList.setCellRenderer(new CompletionCellRenderer());
-        completionList.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
-
-        // Add double-click handler
-        completionList.addMouseListener(new MouseAdapter() {
-            @Override
-            public void mouseClicked(MouseEvent e) {
-                if (e.getClickCount() == 2) {
-                    int index = completionList.locationToIndex(e.getPoint());
-                    if (index >= 0) {
-                        insertCompletion(listModel.getElementAt(index));
-                    }
-                }
-            }
-        });
+        JCheckBox insertCheckbox = new JCheckBox("Insert Completion", settings.isInsertEnabled());
+        insertCheckbox.addActionListener(e -> settings.setInsertEnabled(insertCheckbox.isSelected()));
+        controlsPanel.add(insertCheckbox, BorderLayout.CENTER);
 
         // Add to scroll pane
-        JBScrollPane scrollPane = new JBScrollPane(completionList);
+        JBScrollPane scrollPane = new JBScrollPane(outputPanel);
         add(scrollPane, BorderLayout.CENTER);
 
         // Add toolbar with actions
@@ -110,7 +89,7 @@ public class LlamaCompletionPanel extends JPanel {
 
         // Add clear button
         JButton clearButton = new JButton("Clear");
-        clearButton.addActionListener(e -> clearCompletions());
+        clearButton.addActionListener(e -> clearOutputPanel());
         toolbar.add(clearButton);
 
         return toolbar;
@@ -128,7 +107,7 @@ public class LlamaCompletionPanel extends JPanel {
         String suffix = document.getText().substring(offset);
 
         // Clear existing completions
-        listModel.clear();
+        clearOutputPanel();
 
         // Request new completion
         ApplicationManager.getApplication().executeOnPooledThread(() -> {
@@ -138,7 +117,9 @@ public class LlamaCompletionPanel extends JPanel {
                     String[] lines = completion.content().split("\n");
                     for (String line : lines) {
                         if (!line.trim().isEmpty()) {
-                            listModel.addElement(new CompletionItem(line, completion.timings()));
+                            CompletionItem completionItem = new CompletionItem(line, completion.timings());
+                            insertCompletion(completionItem);
+                            outputPanel.add(new JLabel(completionItem.toString()));
                         }
                     }
                 });
@@ -146,37 +127,27 @@ public class LlamaCompletionPanel extends JPanel {
         });
     }
 
-    private void clearCompletions() {
-        listModel.clear();
+    private void clearOutputPanel() {
+        outputPanel.removeAll();
+        outputPanel.repaint();
     }
 
     private void insertCompletion(CompletionItem item) {
-        Editor editor = FileEditorManager.getInstance(project).getSelectedTextEditor();
-        if (editor == null) return;
+        if (settings.isInsertEnabled()) {
+            Editor editor = FileEditorManager.getInstance(project).getSelectedTextEditor();
+            if (editor == null) return;
 
-        WriteCommandAction.runWriteCommandAction(project, () -> {
-            Document document = editor.getDocument();
-            int offset = editor.getCaretModel().getOffset();
-            document.insertString(offset, item.text());
-            editor.getCaretModel().moveToOffset(offset + item.text().length());
-        });
-    }
-
-    // Custom cell renderer for completions
-    private static class CompletionCellRenderer extends DefaultListCellRenderer {
-        @Override
-        public @NotNull Component getListCellRendererComponent(JList<?> list, Object value,
-                                                               int index, boolean isSelected, boolean cellHasFocus) {
-            CompletionItem item = (CompletionItem)value;
-            JLabel label = (JLabel)super.getListCellRendererComponent(list,
-                    item.getDisplayText(), index, isSelected, cellHasFocus);
-            label.setBorder(JBUI.Borders.empty(5));
-            return label;
+            WriteCommandAction.runWriteCommandAction(project, () -> {
+                Document document = editor.getDocument();
+                int offset = editor.getCaretModel().getOffset();
+                document.insertString(offset, item.text());
+                editor.getCaretModel().moveToOffset(offset + item.text().length());
+            });
         }
     }
 
     record CompletionItem(String text, LlamaResponse.Timings timings) {
-        public @NotNull String getDisplayText() {
+        public @NotNull String toString() {
             return String.format("%s (%.0f ms)",
                     text,
                     timings.prompt_ms());

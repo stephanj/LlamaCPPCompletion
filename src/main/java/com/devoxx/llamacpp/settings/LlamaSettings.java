@@ -32,6 +32,7 @@ public class LlamaSettings implements PersistentStateComponent<LlamaSettings> {
     private int ringUpdateMs = 1000;
     private String language = "en";
     private boolean enabled = true;
+    private boolean insertEnabled = false;
 
     public static final Integer RING_UPDATE_MIN_TIME_LAST_COMPL = 3000;
     public static final Integer MAX_QUEUED_CHUNKS = 16;
