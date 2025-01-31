@@ -1,6 +1,7 @@
 # LlamaCPP Code Completions Project : R&D Plugin for JetBrains IDEs
 
 An R&D code completion plugin for JetBrains IDEs that uses a local LLM through Llama.cpp to provide context-aware code suggestions.
+Once we have this streamlined we'll incorporate this into the OOS [DevoxxGenie](https://github.com/devoxx/DevoxxGenieIDEAPlugin) project.
 
 ## Features
 
