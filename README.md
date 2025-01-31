@@ -34,9 +34,9 @@ https://github.com/user-attachments/assets/2d336dfd-4c27-4fd0-82f2-07cb55702f59
    mkdir models
    ```
 
-2. Download a GGUF model file and place it in the `models` directory. Recommended models:
-    - [Qwen 1.5B Coder](https://huggingface.co/ggml-org/Qwen2.5-Coder-1.5B-Q8_0-GGUF/tree/main) 
-    - Any other GGUF format model
+2. Download any GGUF model file and place it in the `models` directory. 
+
+Recommended GGUF model: [Qwen 1.5B Coder](https://huggingface.co/ggml-org/Qwen2.5-Coder-1.5B-Q8_0-GGUF/tree/main)    
 
    ```bash
    cd models
@@ -53,7 +53,7 @@ https://github.com/user-attachments/assets/2d336dfd-4c27-4fd0-82f2-07cb55702f59
 #### From Source
 1. Clone the repository:
    ```bash
-   git clone https://github.com/your-username/LlamaCPPCompletion.git
+   git clone https://github.com/stephanj/LlamaCPPCompletion.git
    cd LlamaCPPCompletion
    ```
 
