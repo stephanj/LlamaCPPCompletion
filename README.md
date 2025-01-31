@@ -21,6 +21,10 @@ An R&D code completion plugin for JetBrains IDEs that uses a local LLMs through 
 - At least 16GB RAM recommended
 - A GGUF model file (e.g., Qwen, CodeLlama, or other compatible models)
 
+## Demo
+
+https://github.com/user-attachments/assets/2d336dfd-4c27-4fd0-82f2-07cb55702f59
+
 ## Installation
 
 ### Setting up the Model Server
