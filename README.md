@@ -81,6 +81,8 @@ Recommended GGUF model: [Qwen 1.5B Coder](https://huggingface.co/ggml-org/Qwen2.
     - Maximum tokens
     - Response timeouts
     - Context window size
+  
+<img width="487" alt="LlamaCPPComplections" src="https://github.com/user-attachments/assets/2b77f401-eef0-4629-9c9c-cd1328d458ab" />
 
 ## Usage
 
