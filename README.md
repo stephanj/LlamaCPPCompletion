@@ -1,6 +1,6 @@
-# LlamaCPP Completions R&D Plugin for JetBrains IDEs
+# LlamaCPP Code Completions Project : R&D Plugin for JetBrains IDEs
 
-An R&D code completion plugin for JetBrains IDEs that uses a local LLMs through Llama.cpp to provide context-aware code suggestions.
+An R&D code completion plugin for JetBrains IDEs that uses a local LLM through Llama.cpp to provide context-aware code suggestions.
 
 ## Features
 
